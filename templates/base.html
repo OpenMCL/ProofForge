@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}ProofForge{% endblock %}</title>
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="current-user">
+<a href="{% url 'dashboard' %}">回到首頁</a>
+<span>{{ user.get_short_name|default:user.get_username }}</span>
+<form method="post" action="{% url 'logout' %}" style="display:inline">
+  {% csrf_token %}
+  <button type="submit">登出</button>
+</form>
+</div>
+{% endif %}
+{% block content %}{% endblock %}
+</body>
+</html>

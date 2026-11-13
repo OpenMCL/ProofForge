@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block content %}<h2>{{ problem.number }} 提交</h2>
+{% for s in submissions %}<p><a href="/submissions/{{ s.id }}/grade/">
+{{ s.student.profile.student_id }}</a> {{ s.status }}</p>
+{% endfor %}{% endblock %}

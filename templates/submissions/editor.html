@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% load static %}{% block content %}
+<h2>{{ problem.number }}</h2>
+<div style="display:flex;gap:1rem">
+  <textarea id="src" data-pid="{{ problem.id }}" style="width:50%;height:400px"{% if closed %} readonly{% endif %}>{{ content }}</textarea>
+  <div id="preview" style="width:50%"></div>
+</div>
+<span id="status"></span>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex/dist/contrib/auto-render.min.js"></script>
+<script src="{% static 'js/editor.js' %}"></script>{% endblock %}

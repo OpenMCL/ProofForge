@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block content %}
+<form method="post">{% csrf_token %}
+<input name="title" placeholder="課名"><input name="term" placeholder="學期">
+<button type="submit">建立</button></form>{% endblock %}

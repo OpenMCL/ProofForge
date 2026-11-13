@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>建立題目</h1>
+<p>課程：{{ course }}　作業：{{ assignment.title }}</p>
+{% if existing_numbers %}<p>這份作業已有題號：{{ existing_numbers|join:"、" }}</p>{% endif %}
+{% include "_form_errors.html" %}
+<form method="post">
+  {% csrf_token %}
+  <p>
+    <label for="problem-number">題號</label>
+    <input id="problem-number" name="number" type="number" min="1" step="1" required
+           value="{{ form.number.value|default:'' }}">
+  </p>
+  <p>
+    <label for="problem-statement">題目內容</label><br>
+    <textarea id="problem-statement" name="statement" rows="10" cols="80" required>{{ form.statement.value|default:'' }}</textarea>
+  </p>
+  <button type="submit">建立題目</button>
+</form>
+<p><a href="{% url 'course_detail' course.id %}">返回課程</a></p>
+{% endblock %}

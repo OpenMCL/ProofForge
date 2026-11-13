@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>新增助教</h1>
+<p>課程：{{ course }}</p>
+<form method="post">
+  {% csrf_token %}
+  <label for="ta-student-id">助教學號</label>
+  <input id="ta-student-id" name="student_id" placeholder="助教學號" required>
+  <button type="submit">加入助教</button>
+</form>
+<p><a href="{% url 'course_detail' course.id %}">返回課程</a></p>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>批改：第 {{ submission.problem.number }} 題</h1>
+<p>學生：{{ submission.student.get_full_name|default:submission.student.username }}</p>
+<p><a href="{% url 'submission_list' submission.problem.id %}">回到繳交列表</a></p>
+
+{% if not grading_open %}
+<p role="status">作業尚未截止（截止時間：{{ submission.problem.assignment.deadline }}），截止後才能批改。</p>
+{% elif grade %}
+<p role="status">已由 {{ grade.grader.get_full_name|default:grade.grader.username }} 批改，目前分數為 {{ grade.score }}。再次送出將修改分數。</p>
+{% endif %}
+
+{% if error %}<p role="alert">{{ error }}</p>{% endif %}
+{% include "_form_errors.html" %}
+
+<h2>繳交內容</h2>
+{# HTML 解析器會丟棄緊接在 <pre> 之後的第一個換行；這裡刻意放一個，讓內容本身開頭的換行得以保留，位置計算才不會差一 #}
+<pre id="content">
+{{ submission.content_markdown }}</pre>
+
+{% with comments=submission.comments.all %}{% if comments %}
+<h2>已有的行內評論</h2>
+<ul>
+{% for c in comments %}<li>[{{ c.anchor_start }}–{{ c.anchor_end }}] {{ c.body }}（{{ c.author.get_full_name|default:c.author.username }}）</li>
+{% endfor %}</ul>
+{% endif %}{% endwith %}
+
+<form method="post">{% csrf_token %}
+<fieldset{% if not grading_open %} disabled{% endif %}>
+  <p>
+    <label for="id_score">分數</label>
+    <input type="number" id="id_score" name="score" min="0" step="1" required
+           value="{{ form.score.value|default_if_none:'' }}">
+  </p>
+  <p>
+    <label for="id_overall_comment">總評</label><br>
+    <textarea id="id_overall_comment" name="overall_comment" rows="4">{{ form.overall_comment.value|default_if_none:'' }}</textarea>
+  </p>
+
+  <fieldset>
+    <legend>行內評論（選填）</legend>
+    <p>在上方的繳交內容中選取一段文字，再按「使用選取範圍」。</p>
+    <button type="button" id="use-selection">使用選取範圍</button>
+    <input type="hidden" id="id_anchor_start" name="anchor_start" value="{{ form.anchor_start.value|default_if_none:'' }}">
+    <input type="hidden" id="id_anchor_end" name="anchor_end" value="{{ form.anchor_end.value|default_if_none:'' }}">
+    <p id="selection-preview" aria-live="polite"></p>
+    <p>
+      <label for="id_body">評論內容</label><br>
+      <textarea id="id_body" name="body" rows="2">{{ form.body.value|default_if_none:'' }}</textarea>
+    </p>
+  </fieldset>
+
+  <button type="submit">{% if grade %}修改分數{% else %}送出評分{% endif %}</button>
+</fieldset>
+</form>
+
+<script>
+(function () {
+  const pre = document.getElementById("content");
+  const button = document.getElementById("use-selection");
+  const startInput = document.getElementById("id_anchor_start");
+  const endInput = document.getElementById("id_anchor_end");
+  const preview = document.getElementById("selection-preview");
+  if (!pre || !button) return;
+
+  const text = pre.textContent;
+
+  // 瀏覽器的字串索引以 UTF-16 code unit 計算，後端 Python 的 len() 以 code point 計算。
+  // emoji 等 BMP 以外的字元在 JS 中佔 2 個單位、在 Python 中佔 1 個，必須轉換。
+  function toCodePointIndex(utf16Index) {
+    return Array.from(text.slice(0, utf16Index)).length;
+  }
+
+  // 選取的端點可能落在 <pre> 內的任何節點上；量測從 <pre> 開頭到端點的文字長度。
+  function offsetWithinPre(node, offset) {
+    const range = document.createRange();
+    range.selectNodeContents(pre);
+    range.setEnd(node, offset);
+    return range.toString().length;
+  }
+
+  button.addEventListener("click", function () {
+    const selection = window.getSelection();
+    if (!selection.rangeCount || selection.isCollapsed) {
+      preview.textContent = "請先在繳交內容中選取一段文字。";
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    if (!pre.contains(range.startContainer) || !pre.contains(range.endContainer)) {
+      preview.textContent = "只能選取繳交內容中的文字。";
+      return;
+    }
+    const start = offsetWithinPre(range.startContainer, range.startOffset);
+    const end = offsetWithinPre(range.endContainer, range.endOffset);
+    startInput.value = toCodePointIndex(start);
+    endInput.value = toCodePointIndex(end);
+    preview.textContent = "已選取：「" + text.slice(start, end) + "」";  // textContent，不會解析 HTML
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>ProofForge</h1>
+{% if enrollments %}
+<ul>
+{% for enrollment in enrollments %}
+<li><a href="{% url 'course_detail' enrollment.course.id %}">{{ enrollment.course.title }} — {{ enrollment.course.term }}</a>（{{ enrollment.role }}）</li>
+{% endfor %}
+</ul>
+{% elif needs_student_id %}
+<p>系統目前沒有你的學號，因此無法對應到老師匯入的選課名單。</p>
+<p>如果你是學生，請登出後重新登入，並在 NCU Portal 的授權頁面同意提供「學號」。</p>
+{% else %}
+<p>你目前沒有加入任何課程，請聯絡老師加選。</p>
+{% endif %}
+{% if can_create %}
+<p><a href="{% url 'course_create' %}">建立課程</a></p>
+{% endif %}
+{% endblock %}

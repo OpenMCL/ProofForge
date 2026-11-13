@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% block content %}<h1>{{ course }}</h1>
+{% if course_role == "professor" or course_role == "ta" %}
+<p><a href="{% url 'roster_import' course.id %}">學生名單</a></p>
+{% endif %}
+{% if course_role == "professor" %}
+<p><a href="{% url 'add_ta' course.id %}">新增助教</a></p>
+{% endif %}
+{% if course_role == "professor" or course_role == "ta" %}
+<p><a href="{% url 'assignment_create' course.id %}">建立作業</a></p>
+{% endif %}
+{% for a in course.assignments.all %}
+<p>{{ a.title }}（截止：{{ a.deadline|date:"Y-m-d H:i" }}）{% if course_role == "professor" or course_role == "ta" %} <a href="{% url 'problem_create' course.id a.id %}">建立題目</a>{% endif %}</p>
+{% for problem in a.problems.all %}
+<p>
+  {{ problem.number }}
+  {% if course_role == "student" %}
+  <a href="{% url 'editor' problem.id %}">開始作答</a>
+  <a href="{% url 'feedback' problem.id %}">查看回饋</a>
+  {% endif %}
+  {% if course_role == "professor" or course_role == "ta" %}
+  <a href="{% url 'submission_list' problem.id %}">查看提交</a>
+  {% endif %}
+</p>
+{% endfor %}
+{% endfor %}{% endblock %}

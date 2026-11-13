@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>學生名單</h1>
+<p>課程：{{ course }}</p>
+{% for message in messages %}<p role="status">{{ message }}</p>{% endfor %}
+<h2>以 CSV 匯入</h2>
+<p>請上傳 UTF-8 CSV。必要欄位為 <code>student_id</code>，<code>name</code> 為選填。</p>
+<pre>student_id,name
+B001,王小明</pre>
+{% if errors %}
+<p>已匯入 {{ added }} 筆，略過 {{ errors|length }} 列：</p>
+<ul>
+{% for error in errors %}
+<li>第 {{ error.line }} 列：{{ error.reason }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <label for="roster-file">CSV 檔案</label>
+  <input id="roster-file" type="file" name="file" accept=".csv,text/csv" required>
+  <button type="submit">匯入</button>
+</form>
+<h2>目前名單（{{ roster|length }} 人）</h2>
+{% if not has_students %}<p>尚未加入學生。</p>{% endif %}
+{% include "_form_errors.html" with form=add_form %}
+<form id="roster-add-form" method="post" action="{% url 'roster_add' course.id %}">{% csrf_token %}</form>
+<table>
+<thead><tr><th>學號</th><th>姓名</th><th>角色</th><th>狀態</th></tr></thead>
+<tbody>
+{% for enrollment in roster %}
+<tr>
+  <td>{{ enrollment.user.profile.student_id|default:"—" }}</td>
+  <td>{{ enrollment.user.get_full_name|default:enrollment.user.get_username }}</td>
+  <td>{% if enrollment.role == "professor" %}教授{% elif enrollment.role == "ta" %}助教{% else %}學生{% endif %}</td>
+  <td>{% if enrollment.user.profile.oauth_sub %}已登入{% else %}尚未登入{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody>
+<tfoot>
+<tr>
+  <td>
+    <label for="add-student-id">學號</label>
+    <input id="add-student-id" name="student_id" form="roster-add-form" maxlength="20" required
+           value="{{ add_form.student_id.value|default:'' }}">
+  </td>
+  <td>
+    <label for="add-name">姓名</label>
+    <input id="add-name" name="name" form="roster-add-form" maxlength="150"
+           placeholder="選填" value="{{ add_form.name.value|default:'' }}">
+  </td>
+  <td>學生</td>
+  <td><button type="submit" form="roster-add-form">加入</button></td>
+</tr>
+</tfoot>
+</table>
+<p><a href="{% url 'course_detail' course.id %}">返回課程</a></p>
+{% endblock %}

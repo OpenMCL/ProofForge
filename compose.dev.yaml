@@ -1,0 +1,13 @@
+# 開發覆寫：程式碼即時掛載、使用 runserver（自動重載）與 Mock OAuth。
+# docker compose -f compose.yaml -f compose.dev.yaml up --build
+services:
+  web:
+    environment:
+      DJANGO_DEBUG: "1"
+    volumes:
+      - .:/app
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  db:
+    ports:
+      - "5432:5432"

@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block content %}<h2>{{ problem.number }} 回饋</h2>
+
+{% if grade %}<p>分數:{{ grade.score }}</p><p>{{ grade.overall_comment }}</p>
+
+<pre>{{ submission.content_markdown }}</pre>
+
+{% for c in comments %}<p>[{{ c.anchor_start }}-{{ c.anchor_end }}] {{ c.body }}</p>{% endfor %}
+{% else %}<p>尚未批改</p>{% endif %}{% endblock %}

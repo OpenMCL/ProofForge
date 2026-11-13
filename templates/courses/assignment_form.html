@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>建立作業</h1>
+<p>課程：{{ course }}</p>
+{% include "_form_errors.html" %}
+<form method="post">
+  {% csrf_token %}
+  <p>
+    <label for="assignment-title">標題</label>
+    <input id="assignment-title" name="title" maxlength="200" required
+           value="{{ form.title.value|default:'' }}">
+  </p>
+  <p>
+    <label for="assignment-description">說明</label>（選填）<br>
+    <textarea id="assignment-description" name="description" rows="6" cols="80">{{ form.description.value|default:'' }}</textarea>
+  </p>
+  <p>
+    <label for="assignment-deadline">截止時間</label>
+    <input id="assignment-deadline" name="deadline" type="datetime-local" required
+           value="{{ form.deadline.value|default:'' }}">
+    <small>台北時間</small>
+  </p>
+  <button type="submit">建立作業</button>
+</form>
+<p><a href="{% url 'course_detail' course.id %}">返回課程</a></p>
+{% endblock %}

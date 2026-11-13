@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block title %}{{ title }} - ProofForge{% endblock %}{% block content %}
+<h1>{{ title }}</h1>
+<p>{{ message }}</p>
+{% if retry %}<p><a href="{% url 'login' %}{% if next_url %}?next={{ next_url|urlencode }}{% endif %}">重新登入</a></p>{% endif %}{% endblock %}
